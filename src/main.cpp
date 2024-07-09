@@ -249,7 +249,7 @@ void loop(){
   int seconds = timeClient.getSeconds();
 
   //Activate wattering in certain UTC time
-  if((hours == 5 || hours == 16) && (minutes == 0) && (seconds >= 0 && seconds <= 15))
+  if((hours == 5) && (minutes == 0) && (seconds >= 0 && seconds <= 15))
      digitalWrite(outputPump, LOW);
   else
     digitalWrite(outputPump, HIGH);
