@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <link rel="icon" href="data:,">
+    <style>
+        html {
+            font-family: Helvetica;
+            display: inline-block;
+            margin: 0px auto;
+            text-align: center;
+        }
+
+        .button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 16px 40px;
+            text-decoration: none;
+            font-size: 30px;
+            margin: 2px;
+            cursor: pointer;
+        }
+
+        .button2 {
+            background-color: #939599;
+            border: none;
+            color: white;
+            padding: 16px 40px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Naše zahrádka</h1>
+    <svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
+
+        <!-- Second rectangle with text above it -->
+        <rect width="30" height="30" x="135" y="165" rx="5" ry="5" style="fill:red; stroke:black; stroke-width:2; opacity:0.8" />
+        <!-- Text above the second rectangle -->
+        <text x="150" y="160" font-family="Helvetica" font-size="15" fill="black" text-anchor="middle">Sensor</text>
+        
+        <!-- Static time "08:10:55" with "Actual time" string -->
+        <text x="150" y="10" font-family="Helvetica" font-size="15" fill="black" font-weight= "bold" text-anchor="middle">Actual time</text>
+        <text x="150" y="30" font-family="Helvetica" font-size="15" fill="black" text-anchor="middle">08:10:55</text>
+        <!-- Static time "10:00:00" with "Next watering" string -->
+        <text x="150" y="50" font-family="Helvetica" font-size="15" fill="black" font-weight= "bold" text-anchor="middle">Next watering</text>
+        <text x="150" y="70" font-family="Helvetica" font-size="15" fill="black" text-anchor="middle">10:00:00</text>
+    </svg>
+    
+    <p>Čerpadlo - běží</p>
+    <p><a href="/26/on"><button class="button">ON</button></a></p>
+
+</body>
+</html>
