@@ -33,45 +33,50 @@
 </head>
 <body>
     <h1>Naše zahrádka</h1>
-    <svg width='300' height='200' xmlns='http://www.w3.org/2000/svg'>
+    <p><b>Aktuální čas</b><br>
+           <span id='actTime'>-</span></p>
+    <p><b>Příští zalévání</b><br>
+          09:00:00</p>
 
-        <!-- Second rectangle with text above it -->
-        <rect width='30' height='30' x='135' y='165' rx='5' ry='5' style='fill:red; stroke:black; stroke-width:2; opacity:0.8' />
-        <!-- Text above the second rectangle -->
-        <text x='150' y='160' font-family='Helvetica' font-size='15' fill='black' text-anchor='middle'>Sensor</text>
-        
-        <!-- Static time '08:10:55' with 'Actual time' string -->
-        <text x='150' y='10' font-family='Helvetica' font-size='15' fill='black' font-weight= 'bold' text-anchor='middle'>Actual time</text>
-        <text x='150' y='30' font-family='Helvetica' font-size='15' fill='black' text-anchor='middle'>08:10:55</text>
-        <!-- Static time '10:00:00' with 'Next watering' string -->
-        <text x='150' y='50' font-family='Helvetica' font-size='15' fill='black' font-weight= 'bold' text-anchor='middle'>Next watering</text>
-        <text x='150' y='70' font-family='Helvetica' font-size='15' fill='black' text-anchor='middle'>10:00:00</text>
+    
+<!-- 
+    <text x='150' y='10' font-family='Helvetica' font-size='15' fill='black' font-weight= 'bold' text-anchor='middle'>Actual time</text>
+    <text x='150' y='30' font-family='Helvetica' font-size='15' fill='black' text-anchor='middle'>09:00:00</text>
+
+    <text x='150' y='50' font-family='Helvetica' font-size='15' fill='black' font-weight= 'bold' text-anchor='middle'>Next watering</text>
+    <text x='150' y='70' font-family='Helvetica' font-size='15' fill='black' text-anchor='middle'>10:00:00</text> 
+     <text x='150' y='15' font-family='Helvetica' font-size='15' fill='black' text-anchor='middle'>Sensor</text>
+    -->
+
+    <svg width='300' height='60' xmlns='http://www.w3.org/2000/svg'>
+        <text x='150' y='15' fill='black' text-anchor='middle'>Sensor</text>
+        <rect width='30' height='30' x='135' y='20' rx='5' ry='5' style='fill:red; stroke:black; stroke-width:2; opacity:0.8' />
     </svg>
     
     <p>Čerpadlo - běží</p>
-    <p><a href='/26/on'><button class='button'>ON</button></a></p>
+    <p><button class='button', id='buttonPumpCmd'>ON</button></p>
 
 </body>
 
 <script>
     var Socket;
-    document.getElementById('BTN_SEND_BACK').addEventListener('click', button_send_back);
+    document.getElementById('buttonPumpCmd').addEventListener('click', buttonPumpCmd);
     function init() {
       Socket = new WebSocket('ws://' + window.location.hostname + ':81/');
       Socket.onmessage = function(event) {
         processCommand(event);
       };
     }
-    function button_send_back() {
+    function buttonPumpCmd() {
       Socket.send('Sending back some random stuff');
     }
     function processCommand(event) {
-      document.getElementById('rand').innerHTML = event.data;
+      document.getElementById('actTime').innerHTML = event.data;
       console.log(event.data);
     }
     window.onload = function(event) {
       init();
     }
-  </script>
+</script>
 
 </html>
