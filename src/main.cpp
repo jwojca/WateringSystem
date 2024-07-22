@@ -12,6 +12,7 @@
 #include <WiFiClientSecure.h>
 #include <NTPClient.h>
 #include <WebSocketsServer.h>
+#include <ArduinoJson.h>
 
 // SSID and password of Wifi connection:
 const char* ssid = "HonzaNiki";
@@ -22,6 +23,10 @@ String website = "<!DOCTYPE html><html><head> <meta name='viewport' content='wid
 int interval = 1000; // virtual delay
 unsigned long previousMillis = 0; // Tracks the time since last event fired
 
+// Assign output variables to GPIO pins
+const int outputPump = 17;
+const int inputSensor = 16;
+
 WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
 
@@ -31,7 +36,14 @@ NTPClient timeClient(ntpUDP, 7200);
 void webSocketEvent(byte num, WStype_t type, uint8_t * payload, size_t length);
 
 void setup() {
-  Serial.begin(115200);                 
+  Serial.begin(115200);                
+
+  // Initialize inputs and outputs
+  pinMode(outputPump, OUTPUT);
+  //pinMode(inputSensor, INPUT);
+   
+  // Set outputs
+  digitalWrite(outputPump, HIGH); 
  
   WiFi.begin(ssid, password);
   Serial.println("Establishing connection to WiFi with SSID: " + String(ssid));
@@ -66,6 +78,18 @@ void loop() {
     webSocket.broadcastTXT(char_array);               // send char_array to clients
     previousMillis = now;                             // reset previousMillis 
   }
+  int day = timeClient.getDay();
+  int hours = timeClient.getHours();
+  int minutes = timeClient.getMinutes();
+  int seconds = timeClient.getSeconds();
+  
+
+  //Activate wattering in certain day and time
+  if(((day % 2) == 0) && (hours == 5) && (minutes == 0) && (seconds >= 0 && seconds <= 15))
+     digitalWrite(outputPump, LOW);
+  else
+    digitalWrite(outputPump, HIGH);
+
   timeClient.update();
 }
 
