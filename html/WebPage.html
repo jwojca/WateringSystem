@@ -33,6 +33,13 @@
             margin: 2px;
             cursor: pointer;
         }
+        .timeInputClass {
+            font-size: 15px;
+            padding: 10px;
+            border: 1px solid;
+            border-radius: 5px;
+            
+        }
     </style>
 </head>
 <body>
@@ -40,7 +47,8 @@
     <p><b>Aktuální čas</b><br>
            <span id='actTime'>-</span></p>
     <p><b>Příští zalévání</b><br>
-           <span id='timeToWater'>-</span></p>
+           <span id='timeToWater'>-</span><br>
+           <span id='timeWatDuration'>-</span></p>
 
     
 <!-- 
@@ -56,8 +64,19 @@
         <text x='150' y='15' fill='black' text-anchor='middle'>Sensor</text>
         <rect width='30' height='30' x='135' y='20' rx='5' ry='5' style='fill:red; stroke:black; stroke-width:2; opacity:0.8' />
     </svg>
-    <p><span id='pumpState'>-</span></p>
+    <p><span id='pumpState'>Čerpadlo neběží<span></p>
     <p><button class='buttonOn' onclick='changeBtnClass()' id='buttonPumpCmd'>ON</button></p>
+    <p>
+      <label for='timeInput'>Čas zalevání: </label>
+      <input type='time' id='timeInput' class='timeInputClass'/>
+    </p>  
+    <p>
+      <label for='timeDuration'>Délka zalevání: </label>
+      <input type='time' id='timeDuration' class='timeInputClass' step='2' value='00:00:00' min='00:00:01' max='00:00:59' />
+      <label for='timeDuration'>s</label>
+    </p>
+
+    <p><button onclick='sentTime()' id='buttonSendTime'>Uložit</button></p>
 
 </body>
 
@@ -84,13 +103,24 @@
       {
         document.getElementById('buttonPumpCmd').className = 'buttonOff';
         document.getElementById('buttonPumpCmd').innerHTML = 'OFF';
+        document.getElementById('pumpState').innerHTML = 'Čerpadlo běží';
       }
       else
       {
         document.getElementById('buttonPumpCmd').className = 'buttonOn';
         document.getElementById('buttonPumpCmd').innerHTML = 'ON';
+        document.getElementById('pumpState').innerHTML = 'Čerpadlo neběží';
       }          
 
+    }
+
+    function sentTime()
+    {
+      var msg = {
+        timeInputValue: document.getElementById('timeInput').value,
+        timeDurationValue: document.getElementById('timeDuration').value
+      };   
+      Socket.send(JSON.stringify(msg));
     }
 
     function processCommand(event) 
@@ -98,10 +128,12 @@
       var obj = JSON.parse(event.data);
       document.getElementById('actTime').innerHTML = obj.actTime;
       document.getElementById('timeToWater').innerHTML = obj.timeToWater;
-      document.getElementById('pumpState').innerHTML = obj.pumpState;
+      document.getElementById('timeWatDuration').innerHTML = obj.timeWatDuration;
       console.log(obj.actTime);
       console.log(obj.timeToWater); 
     }
+
+
     window.onload = function(event) 
     {
       init();
