@@ -65,7 +65,7 @@
         <rect width='30' height='30' x='135' y='20' rx='5' ry='5' style='fill:red; stroke:black; stroke-width:2; opacity:0.8' />
     </svg>
     <p><span id='pumpState'>Čerpadlo neběží<span></p>
-    <p><button class='buttonOn' onclick='changeBtnClass()' id='buttonPumpCmd'>ON</button></p>
+    <p><button class='buttonOn' id='buttonPumpCmd'>ON</button></p>
     <p>
       <label for='timeInput'>Čas zalevání: </label>
       <input type='time' id='timeInput' class='timeInputClass'/>
@@ -91,8 +91,22 @@
     }
     function buttonPumpCmd() 
     {
+      if(document.getElementById('buttonPumpCmd').innerHTML == 'ON')
+      {
+        document.getElementById('buttonPumpCmd').className = 'buttonOff';
+        document.getElementById('buttonPumpCmd').innerHTML = 'OFF';
+        document.getElementById('pumpState').innerHTML = 'Čerpadlo běží';
+      }
+      else
+      {
+        document.getElementById('buttonPumpCmd').className = 'buttonOn';
+        document.getElementById('buttonPumpCmd').innerHTML = 'ON';
+        document.getElementById('pumpState').innerHTML = 'Čerpadlo neběží';
+      }   
+
       var msg = {
-        pumpCmd: 'changeState'
+        buttonClicked: 'pumpCmdBtn',
+        pumpCmd: 'changeState',
       };   
       Socket.send(JSON.stringify(msg));
     }
@@ -117,6 +131,7 @@
     function sentTime()
     {
       var msg = {
+        buttonClicked: 'timeSaveBtn',
         timeInputValue: document.getElementById('timeInput').value,
         timeDurationValue: document.getElementById('timeDuration').value
       };   

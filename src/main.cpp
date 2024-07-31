@@ -30,7 +30,7 @@ struct timeSetStruct
 
 timeSetStruct timeSet;
 
-String website = "<!DOCTYPE html><html><head> <meta name='viewport' content='width=device-width, initial-scale=1'> <meta charset='UTF-8'> <link rel='icon' href='data:,'> <style> html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center; } .buttonOn { background-color: #4CAF50; border: none; color: white; padding: 16px 40px; text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer; } .buttonOff { background-color: #939599; border: none; color: white; padding: 16px 40px; text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer; } .timeInputClass { font-size: 15px; padding: 10px; border: 1px solid; border-radius: 5px; } </style></head><body> <h1>Naše zahrádka</h1> <p><b>Aktuální čas</b><br> <span id='actTime'>-</span></p> <p><b>Příští zalévání</b><br> <span id='timeToWater'>-</span><br> <span id='timeWatDuration'>-</span></p> <!-- <text x='150' y='10' font-family='Helvetica' font-size='15' fill='black' font-weight= 'bold' text-anchor='middle'>Actual time</text> <text x='150' y='30' font-family='Helvetica' font-size='15' fill='black' text-anchor='middle'>09:00:00</text> <text x='150' y='50' font-family='Helvetica' font-size='15' fill='black' font-weight= 'bold' text-anchor='middle'>Next watering</text> <text x='150' y='70' font-family='Helvetica' font-size='15' fill='black' text-anchor='middle'>10:00:00</text> <text x='150' y='15' font-family='Helvetica' font-size='15' fill='black' text-anchor='middle'>Sensor</text> --> <svg width='300' height='60' xmlns='http://www.w3.org/2000/svg'> <text x='150' y='15' fill='black' text-anchor='middle'>Sensor</text> <rect width='30' height='30' x='135' y='20' rx='5' ry='5' style='fill:red; stroke:black; stroke-width:2; opacity:0.8' /> </svg> <p><span id='pumpState'>Čerpadlo neběží<span></p> <p><button class='buttonOn' onclick='changeBtnClass()' id='buttonPumpCmd'>ON</button></p> <p> <label for='timeInput'>Čas zalevání: </label> <input type='time' id='timeInput' class='timeInputClass'/> </p> <p> <label for='timeDuration'>Délka zalevání: </label> <input type='time' id='timeDuration' class='timeInputClass' step='2' value='00:00:00' min='00:00:01' max='00:00:59' /> <label for='timeDuration'>s</label> </p> <p><button onclick='sentTime()' id='buttonSendTime'>Uložit</button></p></body><script> var Socket; document.getElementById('buttonPumpCmd').addEventListener('click', buttonPumpCmd); function init() { Socket = new WebSocket('ws://' + window.location.hostname + ':81/'); Socket.onmessage = function(event) { processCommand(event); }; } function buttonPumpCmd() { var msg = { pumpCmd: 'changeState' }; Socket.send(JSON.stringify(msg)); } function changeBtnClass() { if(document.getElementById('buttonPumpCmd').innerHTML == 'ON') { document.getElementById('buttonPumpCmd').className = 'buttonOff'; document.getElementById('buttonPumpCmd').innerHTML = 'OFF'; document.getElementById('pumpState').innerHTML = 'Čerpadlo běží'; } else { document.getElementById('buttonPumpCmd').className = 'buttonOn'; document.getElementById('buttonPumpCmd').innerHTML = 'ON'; document.getElementById('pumpState').innerHTML = 'Čerpadlo neběží'; } } function sentTime() { var msg = { timeInputValue: document.getElementById('timeInput').value, timeDurationValue: document.getElementById('timeDuration').value }; Socket.send(JSON.stringify(msg)); } function processCommand(event) { var obj = JSON.parse(event.data); document.getElementById('actTime').innerHTML = obj.actTime; document.getElementById('timeToWater').innerHTML = obj.timeToWater; document.getElementById('timeWatDuration').innerHTML = obj.timeWatDuration; console.log(obj.actTime); console.log(obj.timeToWater); } window.onload = function(event) { init(); } </script></html>";
+String website = "<!DOCTYPE html><html><head> <meta name='viewport' content='width=device-width, initial-scale=1'> <meta charset='UTF-8'> <link rel='icon' href='data:,'> <style> html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center; } .buttonOn { background-color: #4CAF50; border: none; color: white; padding: 16px 40px; text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer; } .buttonOff { background-color: #939599; border: none; color: white; padding: 16px 40px; text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer; } .timeInputClass { font-size: 15px; padding: 10px; border: 1px solid; border-radius: 5px; } </style></head><body> <h1>Naše zahrádka</h1> <p><b>Aktuální čas</b><br> <span id='actTime'>-</span></p> <p><b>Příští zalévání</b><br> <span id='timeToWater'>-</span><br> <span id='timeWatDuration'>-</span></p> <!-- <text x='150' y='10' font-family='Helvetica' font-size='15' fill='black' font-weight= 'bold' text-anchor='middle'>Actual time</text> <text x='150' y='30' font-family='Helvetica' font-size='15' fill='black' text-anchor='middle'>09:00:00</text> <text x='150' y='50' font-family='Helvetica' font-size='15' fill='black' font-weight= 'bold' text-anchor='middle'>Next watering</text> <text x='150' y='70' font-family='Helvetica' font-size='15' fill='black' text-anchor='middle'>10:00:00</text> <text x='150' y='15' font-family='Helvetica' font-size='15' fill='black' text-anchor='middle'>Sensor</text> --> <svg width='300' height='60' xmlns='http://www.w3.org/2000/svg'> <text x='150' y='15' fill='black' text-anchor='middle'>Sensor</text> <rect width='30' height='30' x='135' y='20' rx='5' ry='5' style='fill:red; stroke:black; stroke-width:2; opacity:0.8' /> </svg> <p><span id='pumpState'>Čerpadlo neběží<span></p> <p><button class='buttonOn' id='buttonPumpCmd'>ON</button></p> <p> <label for='timeInput'>Čas zalevání: </label> <input type='time' id='timeInput' class='timeInputClass'/> </p> <p> <label for='timeDuration'>Délka zalevání: </label> <input type='time' id='timeDuration' class='timeInputClass' step='2' value='00:00:00' min='00:00:01' max='00:00:59' /> <label for='timeDuration'>s</label> </p> <p><button onclick='sentTime()' id='buttonSendTime'>Uložit</button></p></body><script> var Socket; document.getElementById('buttonPumpCmd').addEventListener('click', buttonPumpCmd); function init() { Socket = new WebSocket('ws://' + window.location.hostname + ':81/'); Socket.onmessage = function(event) { processCommand(event); }; } function buttonPumpCmd() { if(document.getElementById('buttonPumpCmd').innerHTML == 'ON') { document.getElementById('buttonPumpCmd').className = 'buttonOff'; document.getElementById('buttonPumpCmd').innerHTML = 'OFF'; document.getElementById('pumpState').innerHTML = 'Čerpadlo běží'; } else { document.getElementById('buttonPumpCmd').className = 'buttonOn'; document.getElementById('buttonPumpCmd').innerHTML = 'ON'; document.getElementById('pumpState').innerHTML = 'Čerpadlo neběží'; } var msg = { buttonClicked: 'pumpCmdBtn', pumpCmd: 'changeState', }; Socket.send(JSON.stringify(msg)); } function changeBtnClass() { if(document.getElementById('buttonPumpCmd').innerHTML == 'ON') { document.getElementById('buttonPumpCmd').className = 'buttonOff'; document.getElementById('buttonPumpCmd').innerHTML = 'OFF'; document.getElementById('pumpState').innerHTML = 'Čerpadlo běží'; } else { document.getElementById('buttonPumpCmd').className = 'buttonOn'; document.getElementById('buttonPumpCmd').innerHTML = 'ON'; document.getElementById('pumpState').innerHTML = 'Čerpadlo neběží'; } } function sentTime() { var msg = { buttonClicked: 'timeSaveBtn', timeInputValue: document.getElementById('timeInput').value, timeDurationValue: document.getElementById('timeDuration').value }; Socket.send(JSON.stringify(msg)); } function processCommand(event) { var obj = JSON.parse(event.data); document.getElementById('actTime').innerHTML = obj.actTime; document.getElementById('timeToWater').innerHTML = obj.timeToWater; document.getElementById('timeWatDuration').innerHTML = obj.timeWatDuration; console.log(obj.actTime); console.log(obj.timeToWater); } window.onload = function(event) { init(); } </script></html>";
 
 int interval = 1000; // virtual delay
 unsigned long previousMillis = 0; // Tracks the time since last event fired
@@ -122,28 +122,17 @@ void loop()
   if ((unsigned long)(now - previousMillis) >= interval)  // How much time has passed, accounting for rollover with subtraction!
   {
     String jsonString = "";                           // create a JSON string for sending data to the client
-    StaticJsonDocument<200> doc;                      // create a JSON container
+    JsonDocument doc;                                 // create a JSON container
     JsonObject object = doc.to<JsonObject>();         // create a JSON Object
     object["actTime"] = timeClient.getFormattedTime();  // write data into the JSON object -> I used "rand1" and "rand2" here, but you can use anything else
 
     char timeSetStr[9];
     sprintf(timeSetStr, "%02d:%02d", timeSet.hourSet, timeSet.minuteSet);
     object["timeToWater"] = ((day % 2) == 0) ? "Dnes v: " : "Zítra v: " + String(timeSetStr);
-    Serial.println(timeSet.duration);
     object["timeWatDuration"] = "Doba zalévání: " + String(timeSet.duration) + " s";
     
     serializeJson(doc, jsonString);                   // convert JSON object to string
-    //Serial.println(jsonString);                       // print JSON string to console for debug purposes (you can comment this out)
     webSocket.broadcastTXT(jsonString);               // send JSON string to clients
-
-    
-    /*
-    String str = timeClient.getFormattedTime();
-    int str_len = str.length() + 1;                   
-    char char_array[str_len];
-    str.toCharArray(char_array, str_len);             // convert to char array
-    webSocket.broadcastTXT(char_array);               // send char_array to clients
-    */
     previousMillis = now;                             // reset previousMillis 
   }
 
@@ -182,7 +171,7 @@ void webSocketEvent(byte num, WStype_t type, uint8_t * payload, size_t length) {
       break;
     case WStype_TEXT:                                 // if a client has sent data, then type == WStype_TEXT
       // try to decipher the JSON string received
-      StaticJsonDocument<200> doc;                    // create a JSON container
+      JsonDocument doc;                    // create a JSON container
       DeserializationError error = deserializeJson(doc, payload);
       if (error) 
       {
@@ -192,21 +181,30 @@ void webSocketEvent(byte num, WStype_t type, uint8_t * payload, size_t length) {
       }
       else 
       {
-        // JSON string was received correctly, so information can be retrieved:
-        //Change pump state when button pressed
-        const char* g_pumpCmd = doc["pumpCmd"];
-        const char* g_timeInput = doc["timeInputValue"];
-        const char* g_timeDuration = doc["timeDurationValue"];
-        
-        if(String(g_pumpCmd).equals("changeState"))
-          pumpManCmd = !pumpManCmd;
-        Serial.println("Command: " + String(pumpManCmd));
-        Serial.println("Time input: " + String(g_timeInput));
-        Serial.println("Time duration: " + String(g_timeDuration));
 
-        //time set struct
-  
-        setWaterTime(g_timeInput, g_timeDuration, timeSet);
+        // JSON string was received correctly, so information can be retrieved:
+        const char* g_buttonClicked = doc["buttonClicked"];
+        
+        
+        if(String(g_buttonClicked).equals("pumpCmdBtn"))        //Pump manual control
+        {
+          //Change pump state when button pressed
+          const char* g_pumpCmd = doc["pumpCmd"];
+          if(String(g_pumpCmd).equals("changeState"))
+            pumpManCmd = !pumpManCmd;
+          Serial.println("Command: " + String(pumpManCmd));
+        }
+        else if(String(g_buttonClicked).equals("timeSaveBtn"))  //Save time for next watering
+        {
+          const char* g_timeInput = doc["timeInputValue"];
+          const char* g_timeDuration = doc["timeDurationValue"];
+          Serial.println("Time input: " + String(g_timeInput));
+          Serial.println("Time duration: " + String(g_timeDuration));
+
+          //time set struct
+          setWaterTime(g_timeInput, g_timeDuration, timeSet);
+        }
+
       }
       Serial.println("");
       break;
