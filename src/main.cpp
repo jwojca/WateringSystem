@@ -18,7 +18,10 @@
 const char* ssid = "HonzaNiki";
 const char* password = "42AuGs4tUnpG";
 
-String website = "<!DOCTYPE html><html><head> <meta name='viewport' content='width=device-width, initial-scale=1'> <meta charset='UTF-8'> <link rel='icon' href='data:,'> <style> html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center; } .button { background-color: #4CAF50; border: none; color: white; padding: 16px 40px; text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer; } .button2 { background-color: #939599; border: none; color: white; padding: 16px 40px; } </style></head><body> <h1>Naše zahrádka</h1> <p><b>Aktuální čas</b><br> <span id='actTime'>-</span></p> <p><b>Příští zalévání</b><br> 09:00:00</p> <!-- <text x='150' y='10' font-family='Helvetica' font-size='15' fill='black' font-weight= 'bold' text-anchor='middle'>Actual time</text> <text x='150' y='30' font-family='Helvetica' font-size='15' fill='black' text-anchor='middle'>09:00:00</text> <text x='150' y='50' font-family='Helvetica' font-size='15' fill='black' font-weight= 'bold' text-anchor='middle'>Next watering</text> <text x='150' y='70' font-family='Helvetica' font-size='15' fill='black' text-anchor='middle'>10:00:00</text> <text x='150' y='15' font-family='Helvetica' font-size='15' fill='black' text-anchor='middle'>Sensor</text> --> <svg width='300' height='60' xmlns='http://www.w3.org/2000/svg'> <text x='150' y='15' fill='black' text-anchor='middle'>Sensor</text> <rect width='30' height='30' x='135' y='20' rx='5' ry='5' style='fill:red; stroke:black; stroke-width:2; opacity:0.8' /> </svg> <p>Čerpadlo - běží</p> <p><button class='button', id='buttonPumpCmd'>ON</button></p></body><script> var Socket; document.getElementById('buttonPumpCmd').addEventListener('click', buttonPumpCmd); function init() { Socket = new WebSocket('ws://' + window.location.hostname + ':81/'); Socket.onmessage = function(event) { processCommand(event); }; } function buttonPumpCmd() { Socket.send('Sending back some random stuff'); } function processCommand(event) { document.getElementById('actTime').innerHTML = event.data; console.log(event.data); } window.onload = function(event) { init(); }</script></html>";
+bool pumpManCmd = false;
+String pumpStateStr = "";
+
+String website = "<!DOCTYPE html><html><head> <meta name='viewport' content='width=device-width, initial-scale=1'> <meta charset='UTF-8'> <link rel='icon' href='data:,'> <style> html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center; } .buttonOn { background-color: #4CAF50; border: none; color: white; padding: 16px 40px; text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer; } .buttonOff { background-color: #939599; border: none; color: white; padding: 16px 40px; text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer; } </style></head><body> <h1>Naše zahrádka</h1> <p><b>Aktuální čas</b><br> <span id='actTime'>-</span></p> <p><b>Příští zalévání</b><br> <span id='timeToWater'>-</span></p> <!-- <text x='150' y='10' font-family='Helvetica' font-size='15' fill='black' font-weight= 'bold' text-anchor='middle'>Actual time</text> <text x='150' y='30' font-family='Helvetica' font-size='15' fill='black' text-anchor='middle'>09:00:00</text> <text x='150' y='50' font-family='Helvetica' font-size='15' fill='black' font-weight= 'bold' text-anchor='middle'>Next watering</text> <text x='150' y='70' font-family='Helvetica' font-size='15' fill='black' text-anchor='middle'>10:00:00</text> <text x='150' y='15' font-family='Helvetica' font-size='15' fill='black' text-anchor='middle'>Sensor</text> --> <svg width='300' height='60' xmlns='http://www.w3.org/2000/svg'> <text x='150' y='15' fill='black' text-anchor='middle'>Sensor</text> <rect width='30' height='30' x='135' y='20' rx='5' ry='5' style='fill:red; stroke:black; stroke-width:2; opacity:0.8' /> </svg> <p><span id='pumpState'>-</span></p> <p><button class='buttonOn' onclick='changeBtnClass()' id='buttonPumpCmd'>ON</button></p></body><script> var Socket; document.getElementById('buttonPumpCmd').addEventListener('click', buttonPumpCmd); function init() { Socket = new WebSocket('ws://' + window.location.hostname + ':81/'); Socket.onmessage = function(event) { processCommand(event); }; } function buttonPumpCmd() { var msg = { pumpCmd: 'changeState' }; Socket.send(JSON.stringify(msg)); } function changeBtnClass() { if(document.getElementById('buttonPumpCmd').innerHTML == 'ON') { document.getElementById('buttonPumpCmd').className = 'buttonOff'; document.getElementById('buttonPumpCmd').innerHTML = 'OFF'; } else { document.getElementById('buttonPumpCmd').className = 'buttonOn'; document.getElementById('buttonPumpCmd').innerHTML = 'ON'; } } function processCommand(event) { var obj = JSON.parse(event.data); document.getElementById('actTime').innerHTML = obj.actTime; document.getElementById('timeToWater').innerHTML = obj.timeToWater; document.getElementById('pumpState').innerHTML = obj.pumpState; console.log(obj.actTime); console.log(obj.timeToWater); } window.onload = function(event) { init(); } </script></html>";
 
 int interval = 1000; // virtual delay
 unsigned long previousMillis = 0; // Tracks the time since last event fired
@@ -32,6 +35,13 @@ WebSocketsServer webSocket = WebSocketsServer(81);
 
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, 7200);
+
+// Static IP configuration
+IPAddress staticIP(10, 0, 1, 100); // ESP32 static IP
+IPAddress gateway(10, 0, 1, 138);    // IP Address of your network gateway (router)
+IPAddress subnet(255, 255, 255, 0);   // Subnet mask
+IPAddress primaryDNS(10, 0, 1, 138); // Primary DNS (optional)
+IPAddress secondaryDNS(0, 0, 0, 0);   // Secondary DNS (optional)
 
 void webSocketEvent(byte num, WStype_t type, uint8_t * payload, size_t length);
 
@@ -52,8 +62,23 @@ void setup() {
     delay(1000);
     Serial.print(".");
   }
-  Serial.print("Connected to network with IP address: ");
+  // Configuring static IP
+  if(!WiFi.config(staticIP, gateway, subnet, primaryDNS, secondaryDNS)) {
+    Serial.println("Failed to configure Static IP");
+  } else {
+    Serial.println("Static IP configured!");
+  }
+
+  Serial.print("Current ESP32 IP: ");
   Serial.println(WiFi.localIP());
+  Serial.print("Gateway (router) IP: ");
+  Serial.println(WiFi.gatewayIP());
+  Serial.print("Subnet Mask: " );
+  Serial.println(WiFi.subnetMask());
+  Serial.print("Primary DNS: ");
+  Serial.println(WiFi.dnsIP(0));
+  Serial.print("Secondary DNS: ");
+  Serial.println(WiFi.dnsIP(1));
   
  
   server.on("/", []() {
@@ -65,30 +90,61 @@ void setup() {
   webSocket.onEvent(webSocketEvent);
 }
 
-void loop() {
+void loop() 
+{
   server.handleClient();  // webserver methode that handles all Client
   webSocket.loop();       // Update function for the webSockets 
 
-  unsigned long now = millis(); // call millis  and Get snapshot of time
-  if ((unsigned long)(now - previousMillis) >= interval) { // How much time has passed, accounting for rollover with subtraction!
-    String str = timeClient.getFormattedTime();
-    int str_len = str.length() + 1;                   
-    char char_array[str_len];
-    str.toCharArray(char_array, str_len);             // convert to char array
-    webSocket.broadcastTXT(char_array);               // send char_array to clients
-    previousMillis = now;                             // reset previousMillis 
-  }
   int day = timeClient.getDay();
   int hours = timeClient.getHours();
   int minutes = timeClient.getMinutes();
   int seconds = timeClient.getSeconds();
   
+  int hourSet = 5;
+  int minuteSet = 0;
+  int secSetLow = 0, secSetHigh = 15;
 
-  //Activate wattering in certain day and time
-  if(((day % 2) == 0) && (hours == 5) && (minutes == 0) && (seconds >= 0 && seconds <= 15))
+  //Activate wattering in certain day and time or in manual operation
+  bool timeToWater = ((day % 2) == 0) && (hours == hourSet) && (minutes == minuteSet) && (seconds >= secSetLow && seconds <= secSetHigh);
+   
+  if(pumpManCmd || timeToWater)
      digitalWrite(outputPump, LOW);
   else
     digitalWrite(outputPump, HIGH);
+
+  unsigned long now = millis(); // call millis  and Get snapshot of time
+  if ((unsigned long)(now - previousMillis) >= interval)  // How much time has passed, accounting for rollover with subtraction!
+  {
+    String jsonString = "";                           // create a JSON string for sending data to the client
+    StaticJsonDocument<200> doc;                      // create a JSON container
+    JsonObject object = doc.to<JsonObject>();         // create a JSON Object
+    object["actTime"] = timeClient.getFormattedTime();  // write data into the JSON object -> I used "rand1" and "rand2" here, but you can use anything else
+
+    char timeSetStr[9];
+    sprintf(timeSetStr, "%02d:%02d:%02d", hourSet, minuteSet, secSetLow);
+    object["timeToWater"] = ((day % 2) == 0) ? "Dnes v: " : "Zítra v: " + String(timeSetStr);
+
+    //Pump state message
+    if(pumpManCmd)
+      pumpStateStr = "Čerpadlo běží";
+    else
+      pumpStateStr = "Čerpadlo neběží";
+    object["pumpState"] = pumpStateStr;
+    
+    serializeJson(doc, jsonString);                   // convert JSON object to string
+    //Serial.println(jsonString);                       // print JSON string to console for debug purposes (you can comment this out)
+    webSocket.broadcastTXT(jsonString);               // send JSON string to clients
+
+    
+    /*
+    String str = timeClient.getFormattedTime();
+    int str_len = str.length() + 1;                   
+    char char_array[str_len];
+    str.toCharArray(char_array, str_len);             // convert to char array
+    webSocket.broadcastTXT(char_array);               // send char_array to clients
+    */
+    previousMillis = now;                             // reset previousMillis 
+  }
 
   timeClient.update();
 }
@@ -103,8 +159,23 @@ void webSocketEvent(byte num, WStype_t type, uint8_t * payload, size_t length) {
       // optionally you can add code here what to do when connected
       break;
     case WStype_TEXT:                                 // if a client has sent data, then type == WStype_TEXT
-      for (int i=0; i<length; i++) {                  // print received data from client
-        Serial.print((char)payload[i]);
+      // try to decipher the JSON string received
+      StaticJsonDocument<200> doc;                    // create a JSON container
+      DeserializationError error = deserializeJson(doc, payload);
+      if (error) 
+      {
+        Serial.print(F("deserializeJson() failed: "));
+        Serial.println(error.f_str());
+        return;
+      }
+      else 
+      {
+        // JSON string was received correctly, so information can be retrieved:
+        //Change pump state when button pressed
+        const char* g_pumpCmd = doc["pumpCmd"];
+        if(String(g_pumpCmd).equals("changeState"))
+          pumpManCmd = !pumpManCmd;
+        Serial.println("Command: " + String(pumpManCmd));
       }
       Serial.println("");
       break;

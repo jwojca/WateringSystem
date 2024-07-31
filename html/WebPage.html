@@ -12,7 +12,7 @@
             text-align: center;
         }
 
-        .button {
+        .buttonOn {
             background-color: #4CAF50;
             border: none;
             color: white;
@@ -23,11 +23,15 @@
             cursor: pointer;
         }
 
-        .button2 {
+        .buttonOff {
             background-color: #939599;
             border: none;
             color: white;
             padding: 16px 40px;
+            text-decoration: none;
+            font-size: 30px;
+            margin: 2px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -36,7 +40,7 @@
     <p><b>Aktuální čas</b><br>
            <span id='actTime'>-</span></p>
     <p><b>Příští zalévání</b><br>
-          09:00:00</p>
+           <span id='timeToWater'>-</span></p>
 
     
 <!-- 
@@ -52,9 +56,8 @@
         <text x='150' y='15' fill='black' text-anchor='middle'>Sensor</text>
         <rect width='30' height='30' x='135' y='20' rx='5' ry='5' style='fill:red; stroke:black; stroke-width:2; opacity:0.8' />
     </svg>
-    
-    <p>Čerpadlo - běží</p>
-    <p><button class='button', id='buttonPumpCmd'>ON</button></p>
+    <p><span id='pumpState'>-</span></p>
+    <p><button class='buttonOn' onclick='changeBtnClass()' id='buttonPumpCmd'>ON</button></p>
 
 </body>
 
@@ -67,16 +70,45 @@
         processCommand(event);
       };
     }
-    function buttonPumpCmd() {
-      Socket.send('Sending back some random stuff');
+    function buttonPumpCmd() 
+    {
+      var msg = {
+        pumpCmd: 'changeState'
+      };   
+      Socket.send(JSON.stringify(msg));
     }
-    function processCommand(event) {
-      document.getElementById('actTime').innerHTML = event.data;
-      console.log(event.data);
+
+    function changeBtnClass()
+    {
+      if(document.getElementById('buttonPumpCmd').innerHTML == 'ON')
+      {
+        document.getElementById('buttonPumpCmd').className = 'buttonOff';
+        document.getElementById('buttonPumpCmd').innerHTML = 'OFF';
+      }
+      else
+      {
+        document.getElementById('buttonPumpCmd').className = 'buttonOn';
+        document.getElementById('buttonPumpCmd').innerHTML = 'ON';
+      }          
+
     }
-    window.onload = function(event) {
+
+    function processCommand(event) 
+    {
+      var obj = JSON.parse(event.data);
+      document.getElementById('actTime').innerHTML = obj.actTime;
+      document.getElementById('timeToWater').innerHTML = obj.timeToWater;
+      document.getElementById('pumpState').innerHTML = obj.pumpState;
+      console.log(obj.actTime);
+      console.log(obj.timeToWater); 
+    }
+    window.onload = function(event) 
+    {
       init();
     }
+
+    
+
 </script>
 
 </html>
